@@ -48,5 +48,6 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     # subsamplati, il secondo è il tempo che ci è stato a generarli (usalo per sistemare la frequenza)   
 
 lista, end_time = generate_and_subsample(600,200, 0)
+print(len(lista))
 print(end_time)
 

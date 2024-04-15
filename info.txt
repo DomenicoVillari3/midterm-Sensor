@@ -1,0 +1,6 @@
+3 thread (penso di più a sto punto) 
+1 generazione 
+1 visualizzazione
+1 subsampling
+1 memorizza su file csv
+1 che invia tramite socket RAW al posto di TCP va fatto un formato di dati che ha un header
