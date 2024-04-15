@@ -18,18 +18,10 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     # Determinazione del fattore di downsampling
     fattore_downsampling = int(frequenza_campionamento_originale / frequenza_campionamento_desiderata)
 
-    # Calcolo del numero di campioni sottocampionati
-    numero_campioni_sottocampionati = int(numero_campioni_originale / fattore_downsampling)
-
-    # Reshape dei segnali per la media dei campioni
-    segnale1_reshaped = segnale1[:numero_campioni_sottocampionati * fattore_downsampling].reshape(-1, fattore_downsampling)
-    segnale2_reshaped = segnale2[:numero_campioni_sottocampionati * fattore_downsampling].reshape(-1, fattore_downsampling)
-    segnale3_reshaped = segnale3[:numero_campioni_sottocampionati * fattore_downsampling].reshape(-1, fattore_downsampling)
-
-    # Calcolo della media per ogni sottocampionamento
-    segnale1_subsamp = np.mean(segnale1_reshaped, axis=1)
-    segnale2_subsamp = np.mean(segnale2_reshaped, axis=1)
-    segnale3_subsamp = np.mean(segnale3_reshaped, axis=1)
+    # Calcolo della media dei campioni consecutivi
+    segnale1_subsamp = np.mean(segnale1.reshape(-1, fattore_downsampling), axis=1)
+    segnale2_subsamp = np.mean(segnale2.reshape(-1, fattore_downsampling), axis=1)
+    segnale3_subsamp = np.mean(segnale3.reshape(-1, fattore_downsampling), axis=1)
 
     # Creazione della macrolista sottocampionata mantenendo la struttura di liste
     macrolista_subsamp = []
@@ -45,9 +37,7 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     return macrolista_subsamp, generation_time
 
     # PER MIMMO: quando importi questa funzione, ricoradati che ritorna una tupla: il primo valore è la lista di valori
-    # subsamplati, il secondo è il tempo che ci è stato a generarli (usalo per sistemare la frequenza)   
+    # subsamplati, il secondo è il tempo che ci è stato a generarli (usalo per sistemare la frequenza)
+lista_sub, end_time = generate_and_subsample(30, 10, 0)
 
-lista, end_time = generate_and_subsample(600,200, 0)
-print(len(lista))
-print(end_time)
-
+print(lista_sub)
