@@ -2,18 +2,16 @@ import numpy as np
 from numpy.random import Generator, PCG64
 from time import perf_counter, sleep
 
-def generate_and_subsample(frequenza_campionamento_originale, frequenza_campionamento_desiderata, time_to_wait):
+def generate_and_subsample(frequenza_campionamento_originale, frequenza_campionamento_desiderata):
     start_time = perf_counter()
-    wait_time = 1 - time_to_wait
-    sleep(wait_time)
     rg = Generator(PCG64())
     durata_segnale = 1  # Secondi
     numero_campioni_originale = int(frequenza_campionamento_originale * durata_segnale)
 
     # Generazione di segnali casuali (600 valori per ogni segnale)
-    segnale1 = rg.standard_normal(numero_campioni_originale)
-    segnale2 = rg.standard_normal(numero_campioni_originale)
-    segnale3 = rg.standard_normal(numero_campioni_originale)
+    segnale1 = rg.uniform(-5, 5, numero_campioni_originale)
+    segnale2 = rg.uniform(-5, 5, numero_campioni_originale)
+    segnale3 = rg.uniform(-5, 5, numero_campioni_originale)
 
     # Determinazione del fattore di downsampling
     fattore_downsampling = int(frequenza_campionamento_originale / frequenza_campionamento_desiderata)
@@ -47,10 +45,13 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
 
     generation_time = end_time - start_time
 
-    return macrolista_subsamp, generation_time
+    sleep(1 - generation_time)
+    
+    return macrolista_subsamp
 
     # PER MIMMO: quando importi questa funzione, ricordati che ritorna una tupla: il primo valore è la lista di valori
     # subsamplati, il secondo è il tempo che ci è stato a generarli (usalo per sistemare la frequenza)
 
-# lista_sub, end_time = generate_and_subsample(30, 10, 0)
-# print(lista_sub)
+lista_sub = generate_and_subsample(600, 200)
+print(lista_sub)
+
