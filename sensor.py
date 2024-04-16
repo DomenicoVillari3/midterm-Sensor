@@ -8,40 +8,13 @@ from itertools import count
 
 from sensor_generate import generate_and_subsample
 
-
-def generate():
-    start = perf_counter()
-    rg = Generator(PCG64())
-
-    # Parametri del segnale
-    frequenza_campionamento = 600  # Campioni al secondo
-    durata_segnale = 1  # Secondi
-    numero_campioni = int(frequenza_campionamento * durata_segnale)
-
-    # Generazione di segnali casuali (600 valori per ogni segnale)
-    segnale1 = rg.standard_normal(numero_campioni)
-    segnale2 = rg.standard_normal(numero_campioni)
-    segnale3 = rg.standard_normal(numero_campioni)
-
-    # Creazione della macrolista
-    macrolista = []
-
-    # Creazione di sottoliste con 3 segnali ciascuna
-    for i in range(numero_campioni):
-        sottolista = [segnale1[i], segnale2[i], segnale3[i]]
-        macrolista.append(sottolista)
-
-    # Stampa della macrolista
-    end = perf_counter()
-
-    print(macrolista)
-    print(end-start)
-    return macrolista
+freq_inziale= 600 # 0.6 kHz
+freq_desiderata= 200 # 0.2 kHz
 
 
 
 def main():
-    lista=generate()
+    lista=generate_and_subsample(freq_inziale,freq_desiderata)
     myplot(lista=lista)
 
 
@@ -79,29 +52,23 @@ def myplot(lista):
             plt.pause(0.1) 
         
         #rimuovo i dati precedenti ogni 200 valori
-        if index %200==0:
-            print("clear")
-            x_vals=x_vals[200:]
-            y_vals=y_vals[200:]
-            z_vals=z_vals[200:]
-            indexes=indexes[200:]
+        if index %(freq_desiderata//2)==0:
+            x_vals=x_vals[(freq_desiderata//2):]
+            y_vals=y_vals[(freq_desiderata//2):]
+            z_vals=z_vals[(freq_desiderata//2):]
+            indexes=indexes[(freq_desiderata//2):]
             #mi assicuro che alla fine non venga pulito il plot 
-            if index %600 !=0:
+            if index %freq_desiderata !=0:
                 axs[0].cla()
                 axs[1].cla()
                 axs[2].cla()
                 plt.cla()
             
-
-        
-
     plt.show()
 
 
 
 
-    plt.ioff()
-    plt.show()
 
 if __name__ == '__main__':
     main()
