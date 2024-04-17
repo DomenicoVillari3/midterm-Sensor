@@ -3,24 +3,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import Generator, PCG64
 from time import perf_counter, sleep
+import struct
+import socket
+
+
 from csv_writer import write_to_csv  # Importa la funzione per scrivere i dati nel file CSV
 
 #Frequenze 
 freq_inziale= 600 # 0.6 kHz
 freq_desiderata= 200 # 0.2 kHz
+
+#var Per l'edge server
+Host="127.0.0.1" 
+port=65435
+
 #Var globali utili per il plot 
 lista=[]
 setPlot=False
 index=0
 
 
+
 def main():
     #variabili globali
     global lista
     global setPlot 
+    
+    i=0
 
-
-    while True:
+    while  i<=10:
         
         #thread per generare valori
         t1 = threading.Thread(target=generate_and_subsample,args=(freq_inziale, freq_desiderata,))
@@ -30,7 +41,11 @@ def main():
         #thread per scrivere su file csv
         t2 = threading.Thread(target=write_to_csv, args=(lista, "freq.csv",))
         t2.start()
-        t2.join()
+        
+
+        #thread per inviare i dati 
+        t3 = threading.Thread(target=send_data, args=(Host,port,lista,))
+        t3.start()
         
 
         #richiamo plot (non è consigliato non usare i thread)
@@ -38,6 +53,8 @@ def main():
             fig, axs = plt.subplots(3, 1, figsize=(8, 12)) #creo finestra con i plot
             setPlot=True #imposto set a True così non verrà più creata alcuna finestra 
         myplot(lista,axs)   #ricniamo funzione per il plot
+
+        i+=1
 
 ######################################################################################################################################################
 
@@ -111,20 +128,7 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     # Determinazione del fattore di downsampling 
     fattore_downsampling = int(frequenza_campionamento_originale / frequenza_campionamento_desiderata)
 
-    '''Calcolo della media dei campioni consecutivi
-        Il motivo per cui facciamo il reshape è per far si che la media venga fatta per valori a 3 a 3 (Nel nostro caso)
-        Infatti, l'array per ogni segnale è unidimensionale, facciamo un esempio con frequenza 9 e sumsampling a 3, in modo da ottenere 3
-        come fattore di downsampling:
-        [-0.14074699 1.56239642 -0.06591029 -0.71355907 -0.68971163 -0.12130035 -0.61073159 0.82995997 -1.15069117].
-        Nel momento in cui facciamo il reshape trasformiamo l'array in:
-        [[-0.14074699 1.56239642 -0.06591029]
-        [-0.71355907 -0.68971163 -0.12130035]
-        [-0.61073159 0.82995997 -1.15069117]]
-        Come possiamo vedere i dati sono organizzati in sottoarray con tre elementi. In questo modo la funzione np.mean() andrà a fare la media 
-        dei sottoarray (axis=1 vuol dire lungo le colonne, nel nostro caso solo una colonna).
-        Quindi [-0.14074699 1.56239642 -0.06591029] sarà la somma divisa per 3, che fa 0.45191305 e così via per gli altri elementi (colonne).
-        Alla fine avremo un array unidimensionale: [ 0.45191305 -0.50819035 -0.3104876 ] che verrà inserito nella sottolista e infine nella macrolista.
-    '''
+    
     segnale1 = np.float32(segnale1)
     segnale2 = np.float32(segnale2)
     segnale3 = np.float32(segnale3)
@@ -152,8 +156,24 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     global lista 
     lista = macrolista_subsamp
 
+################################################################################################################################################################
 
+def send_data(host,port,dati):
+    #lista binaria per contenere i dati da inviare 
+    binary_data=b""
 
+    #recupero i 3 valori per ogni punto nella lista di dati     
+    for f in dati:
+        binary_data += struct.pack('f', f[0]) # asse x
+        binary_data += struct.pack('f', f[1]) # asse y
+        binary_data += struct.pack('f', f[2]) # asse z
+    
+    #Invio tramite TCP
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((host, port))
+                s.sendall(binary_data)
+                #s.send(b"")
+                s.close()
 
 
 if __name__ == '__main__':

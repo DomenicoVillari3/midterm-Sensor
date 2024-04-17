@@ -1,6 +1,6 @@
 import socket
 import struct
-from sensor_generate import generate_and_subsample
+from tmp_file.sensor_generate import generate_and_subsample
 import sys
 
 dati=generate_and_subsample(600,200)
