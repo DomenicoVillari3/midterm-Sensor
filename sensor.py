@@ -7,6 +7,7 @@ import time
 from itertools import count
 
 from sensor_generate import generate_and_subsample
+from csv_writer import write_to_csv  # Importa la funzione per scrivere i dati nel file CSV
 
 freq_inziale= 600 # 0.6 kHz
 freq_desiderata= 200 # 0.2 kHz
@@ -14,7 +15,8 @@ freq_desiderata= 200 # 0.2 kHz
 
 
 def main():
-    lista=generate_and_subsample(freq_inziale,freq_desiderata)
+    lista = generate_and_subsample(freq_inziale, freq_desiderata)
+    write_to_csv(lista, 'dati_generati.csv')  # Scrive i dati nel file CSV
     myplot(lista=lista)
 
 
