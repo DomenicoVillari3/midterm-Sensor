@@ -52,7 +52,7 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
   generation_time = end_time - start_time
 
   sleep(1 - generation_time)
-  #print(macrolista_subsamp)
+  print(macrolista_subsamp)
    
   return macrolista_subsamp
 

@@ -1,57 +1,49 @@
+import numpy as np
 import socket
 import struct
-from time import sleep
-import sys 
 
+class Server:
+    def __init__(self,host,port):
+        self.host=host
+        self.port=port
 
-# Crea un socket per la ricezione dei pacchetti
-s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
-# Bind al dispositivo di rete
-s.bind(("lo", 0))
+    def receive(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((self.host, self.port))
+            s.listen()
+            print("Server listening on port ", self.port)
+            conn,addr=s.accept()
+            with conn:
+                print("Connessione instaurata col clinet ",addr)
+                received_data = b''
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    received_data += data
 
-# Dimensione massima dei dati da ricevere
-BUFFER_SIZE =  1518
+                float_data =[]
+                for i in range(0,len(received_data),4):
+                    print(data)
+                    
+                    if(i+4 <= len(received_data)):
+                        unpacked_data = struct.unpack('f' ,received_data[i:i+4])
+                    else:
+                        unpacked_data = struct.unpack('f' ,received_data[i:len(received_data)])
+                    
+                    float_data.append(unpacked_data)
+                   
 
-while True:
-    # Ricevi il pacchetto
-    packet, _ = s.recvfrom(BUFFER_SIZE)
-    
-    # Estrai i dati dal pacchetto
-    ethernet_header = packet[:14]  # Ethernet header di 14 byte
-    ip_header = packet[14:34]  # IP header di 20 byte
-    data = packet[34:]  # Dati
+                
 
-    # Analizza l'header Ethernet per verificare se è il pacchetto desiderato
-    destination_mac = ethernet_header[:6]
-    source_mac = ethernet_header[6:12]
-    protocol_type = ethernet_header[12:14]
+                
+                print("Data received: ", float_data)
+                print("len: ", len(float_data))
 
-    if protocol_type == b'\x08\x00':  # Protocollo IPv4
-        # Analizza l'header IP
-        version_ihl = ip_header[0]
-        ttl = ip_header[8]
-        protocol = ip_header[9]
-        source_ip = socket.inet_ntoa(ip_header[12:16])
-        destination_ip = socket.inet_ntoa(ip_header[16:20])
+            s.close()
+                    
+                    
 
-        # Decodifica i dati
-        float_data = []
-        for value in data.split(b','):
-            if len(value) == 4:  # Assicura che ci siano 4 byte per il float
-                float_data.append(struct.unpack('f', value)[0])
-            else:
-                #print("Errore: Dati non validi, la lunghezza non è di 4 byte.")
-                pass
-
-        # Stampa i dati ricevuti
-        #print("Pacchetto ricevuto:")
-        #print("Indirizzo IP di origine:", source_ip)
-        #print("Indirizzo IP di destinazione:", destination_ip)
-        if len(float_data)>0:
-            print("Dati float:", float_data)
-            print(len(float_data))
-            dimensione_in_byte = sys.getsizeof(float_data)
-            print(dimensione_in_byte)
-            float_data.clear()
-            sleep(5)
-
+s=Server("127.0.0.1",port=65435)
+s.receive()                
+                    
