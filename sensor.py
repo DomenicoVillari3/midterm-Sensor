@@ -1,4 +1,4 @@
-from threading import Thread
+import threading
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import Generator, PCG64
@@ -15,13 +15,28 @@ freq_desiderata= 200 # 0.2 kHz
 
 
 def main():
-    lista = generate_and_subsample(freq_inziale, freq_desiderata)
-    write_to_csv(lista, 'dati_generati.csv')  # Scrive i dati nel file CSV
-    myplot(lista=lista)
+    #lista = generate_and_subsample(freq_inziale, freq_desiderata)
+    #write_to_csv(lista, 'dati_generati.csv')  # Scrive i dati nel file CSV
+    #myplot(lista=lista)
 
+    while True:
+        t1 = threading.Thread(target=generate_and_subsample,args=(freq_inziale, freq_desiderata,))
+        t1.start()
+        lista=t1.join()
+        t2 = threading.Thread(target=write_to_csv, args=(lista, freq_desiderata,))
+        t2.start()
+    
+        
+        t3 = threading.Thread(target=myplot, args=(lista,))
+        t3.start()
+        t2.join()
+        t3.join()
 
 
 def myplot(lista):
+    if lista is None:
+        return
+    
     #subplot per avere una finestra con 3 grafici differenti 
     fig, axs = plt.subplots(3, 1, figsize=(8, 12))
     
