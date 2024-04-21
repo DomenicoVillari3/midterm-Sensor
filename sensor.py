@@ -133,6 +133,8 @@ def generate_and_subsample(frequenza_campionamento_originale, frequenza_campiona
     segnale2 = np.float32(segnale2)
     segnale3 = np.float32(segnale3)
 
+    #mean fa la media degli array prendendo in input l'output di reshape, lungo le colonne (axis=1)
+    #reshape trasforma l'array in un array in cui i valori sono raggruppati in sottoarray di 3 elementi(x,y,z)
     segnale1_subsamp = np.mean(segnale1.reshape(-1, fattore_downsampling), axis=1)
     segnale2_subsamp = np.mean(segnale2.reshape(-1, fattore_downsampling), axis=1)
     segnale3_subsamp = np.mean(segnale3.reshape(-1, fattore_downsampling), axis=1)
